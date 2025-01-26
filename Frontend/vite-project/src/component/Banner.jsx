@@ -30,7 +30,7 @@ const Banner = () => {
   </svg>
   <input type="text" className="grow bg-transparent outline-none" placeholder="Enter your email to login" />
 </label>
-     <div><button className="btn btn-secondary">Submit</button></div>
+     <div><button className="btn btn-secondary ">Get Started</button></div>
       </div> 
       
      

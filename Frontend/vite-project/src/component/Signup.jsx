@@ -1,9 +1,15 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Login from "../home/Login";
 import { useForm } from "react-hook-form";
+import axios from "axios";
+import toast, { Toaster } from 'react-hot-toast';
 
 function Signup() {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const form = location.state?.form?.pathname || "/";  // Ensure 'form' is extracted properly
+
   const {
     register,
     handleSubmit,
@@ -11,8 +17,32 @@ function Signup() {
     watch,
   } = useForm();
 
-  const onSubmit = (data) => {
-    console.log(data); // Replace this with your signup logic
+  const onSubmit = async (data) => {
+    const userInfo = {
+      Fullname: data.fullname,
+      Email: data.email,
+      Password: data.password,
+      ReenterPassword: data.reenterPassword,
+    };
+
+    try {
+      const res = await axios.post("http://localhost:4001/users/signup", userInfo);
+
+      console.log(res.data);
+
+      if (res.data) {
+        toast.success('Signup Successful');  // Fixed the quote typo
+        localStorage.setItem("Users", JSON.stringify(res.data));
+        
+        // Redirect to the specified form or homepage
+        navigate(form, { replace: true });
+      }
+    } catch (err) {
+      console.error(err);
+      if (err.response && err.response.data) {
+        toast.error("Error: " + err.response.data.message);
+      }
+    }
   };
 
   // Watch the password field to compare with confirmPassword
@@ -23,19 +53,17 @@ function Signup() {
 
   return (
     <>
-      <div className="items-center flex justify-center min-h-screen">
-
+      <div className="dark:bg-slate-900 items-center flex justify-center min-h-screen">
         <div className="w-[600px]">
-          <div className="modal-box bg-white text-slate-900 shadow-2xl border-[1px]">
-          <Link to ="/"
+          <div className="dark:bg-slate-800 dark:text-slate-100 modal-box bg-white text-slate-900 shadow-2xl border-[1px]">
+            <Link
+              to="/"
               className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
               onClick={closeModal}
             >
               ✕
             </Link>
-            
             <h3 className="font-bold text-2xl">Signup</h3>
-
             <form onSubmit={handleSubmit(onSubmit)} className="m-2 p-6 space-y-5">
               {/* Username Input */}
               <div>
@@ -44,8 +72,8 @@ function Signup() {
                 <input
                   type="text"
                   placeholder="Enter your username"
-                  className="dark:bg-slate-800 w-80 px-3 border rounded-md outline-none bg-gray-200 hover:scale-105 duration-200 hover:shadow-lg hover:border-gray-200"
-                  {...register("username", {
+                  className="w-80 px-2 border rounded-md outline-none bg-gray-200 hover:scale-105 duration-200 hover:shadow-lg hover:border-gray-200 dark:hover:bg-transparent dark:bg-slate-700"
+                  {...register("fullname", {
                     required: "Username is required",
                     pattern: {
                       value: /^[a-zA-Z0-9_]+$/,
@@ -54,8 +82,8 @@ function Signup() {
                     },
                   })}
                 />
-                {errors.username && (
-                  <p className="text-red-500 text-sm">{errors.username.message}</p>
+                {errors.fullname && (
+                  <p className="text-red-500 text-sm">{errors.fullname.message}</p>
                 )}
               </div>
 
@@ -66,7 +94,7 @@ function Signup() {
                 <input
                   type="email"
                   placeholder="Enter your Email"
-                  className="dark:bg-slate-800 w-80 px-3 border rounded-md outline-none bg-gray-200 hover:scale-105 duration-200 hover:shadow-lg hover:border-gray-200"
+                  className="dark:hover:bg-transparent dark:bg-slate-700 w-80 px-3 border rounded-md outline-none bg-gray-200 hover:scale-105 duration-200 hover:shadow-lg hover:border-gray-200"
                   {...register("email", { required: "Email is required" })}
                 />
                 {errors.email && (
@@ -81,7 +109,7 @@ function Signup() {
                 <input
                   type="password"
                   placeholder="Enter your password"
-                  className="dark:bg-slate-800 w-80 px-3 border rounded-md outline-none bg-gray-200 hover:scale-105 duration-200 hover:shadow-lg hover:border-gray-200"
+                  className="dark:hover:bg-transparent dark:bg-slate-700 w-80 px-3 border rounded-md outline-none bg-gray-200 hover:scale-105 duration-200 hover:shadow-lg hover:border-gray-200"
                   {...register("password", {
                     required: "Password is required",
                     minLength: {
@@ -102,16 +130,16 @@ function Signup() {
                 <input
                   type="password"
                   placeholder="Re-enter your password"
-                  className="dark:bg-slate-800 w-80 px-3 border rounded-md outline-none bg-gray-200 hover:scale-105 duration-200 hover:shadow-lg hover:border-gray-200"
-                  {...register("confirmPassword", {
+                  className="dark:hover:bg-transparent dark:bg-slate-700 w-80 px-3 border rounded-md outline-none bg-gray-200 hover:scale-105 duration-200 hover:shadow-lg hover:border-gray-200"
+                  {...register("reenterPassword", {
                     required: "Please confirm your password",
                     validate: (value) =>
                       value === password || "Passwords do not match",
                   })}
                 />
-                {errors.confirmPassword && (
+                {errors.reenterPassword && (
                   <p className="text-red-500 text-sm">
-                    {errors.confirmPassword.message}
+                    {errors.reenterPassword.message}
                   </p>
                 )}
               </div>
@@ -147,86 +175,3 @@ function Signup() {
 }
 
 export default Signup;
-
-
-// import React, { useDebugValue } from 'react'
-// import { Link } from 'react-router-dom'
-// import Login from '../home/Login'
-// import { useForm } from "react-hook-form";
-
-// function Signup() {
-//      const {
-//         register,
-//         handleSubmit,
-//         formState: { errors },
-//       } = useForm();
-    
-//       const onSubmit = (data) => {
-//         console.log(data); // Replace this with your login logic
-//       };
-//     return (
-//         <> <div className=' items-center flex justify-center min-h-screen '>
-
-//             <div className="w-[600px]">
-//                 <div className="modal-box bg-white text-slate-900 shadow-2xl border-[1px]">
-//                     <form onSubmit={handleSubmit(onSubmit)} method="dialog">
-//                         {/* if there is a button in form, it will close the modal */}
-//                         <Link to='/' className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</Link>
-//                     </form>
-//                     <h3 className="font-bold text-2xl">Signup</h3>
-
-//                     <div className='m-2 p-6 space-y-5 '>
-
-//                         <div className=''>
-//                             <span className=' text-lg '>Username
-//                             </span>
-//                             <br />
-//                             <input type="text" placeholder='Enter your username' className='dark:bg-slate-800 w-80 px-3 border rounded-md outline-none bg-gray-200 hover:scale-105 duration-200 hover:shadow-lg hover:border-gray-200' {...register("username", { required: "username is required" })} />
-//                         </div>
-//                         <div className=''>
-//                             <span className=' text-lg '>Email</span>
-//                             <br />
-//                             <input type="Email" placeholder='Enter your Email' className='dark:bg-slate-800 w-80 px-3 border rounded-md outline-none bg-gray-200 hover:scale-105 duration-200 hover:shadow-lg hover:border-gray-200'  {...register("email", { required: "Email is required" })}/>
-//                         </div>
-//                         <div className=''>
-//                             <span className=' text-lg'>Password</span>
-//                             <br />
-//                             <input type="password" placeholder='Enter your password' className=' dark:bg-slate-800 w-80 px-3 border rounded-md outline-none bg-gray-200 hover:scale-105 duration-200 hover:shadow-lg hover:border-gray-200 ' {...register("password", { required: "password is required" })} />
-
-//                         </div>
-//                         <div className=''>
-//                             <span className=' text-lg'>Re-enter Password</span>
-//                             <br />
-//                             <input type="password" placeholder='Enter your password' className=' dark:bg-slate-800 w-80 px-3 border rounded-md outline-none bg-gray-200 hover:scale-105 duration-200 hover:shadow-lg hover:border-gray-200 ' {...register("password", { required: "password is required" })} />
-
-//                         </div>
-
-//                         {/* button */}
-//                         <div className='flex justify-around'>
-//                             <button>
-//                                 <div className="btn btn-outline m-2 border-1 bg-slate-200 border-gray-200 text-gray-600 hover:bg-pink-500 hover:text-white duration-300  text-sm rounded hover:scale-105  duration-300 shadow-lg cursor-pointer text-center text-lg font-bold">Signup</div>
-//                             </button>
-//                             <p className='text-center p-4 '>Have an account? <button
-//                                 className='text-blue-500 underline  cursor-pointer'
-//                                 onClick={() => document.getElementById('login_id').showModal()}>
-//                                 Login
-//                             </button>{""}
-//                              <Login />
-
-//                             </p>
-//                         </div>
-
-
-
-//                     </div>
-
-//                 </div>
-//             </div>
-//         </div>
-
-//         </>
-//     )
-// }
-
-// export default Signup
-
